@@ -720,7 +720,7 @@ const handleSmartReply = async () => {
                     )}
 
                     {showMenu && (
-    <div className="absolute bottom-14 right-0 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg shadow-lg text-sm text-white p-3 w-48 z-50">
+    <div className="absolute bottom-14 right-0 bg-gray-900/95 backdrop-blur-md border border-white/20 rounded-lg shadow-lg text-sm text-white p-3 w-48 z-50">
 
         <p 
             onClick={handleAiRephrase} 
