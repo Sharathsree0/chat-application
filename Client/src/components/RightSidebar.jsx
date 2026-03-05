@@ -34,9 +34,7 @@ const RightSidebar = ({ rightbarOpen, setRightbarOpen }) => {
         w-[280px] md:w-full
         transform transition-transform duration-300 ease-in-out
         ${rightbarOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
-        text-white overflow-y-auto
-        flex flex-col
-        max-md:hidden md:flex
+        text-white overflow-y-auto flex flex-col
       `}>
 
         {/* Mobile close button */}
