@@ -46,7 +46,7 @@ const Chatcontainer = ({ setSidebarOpen, setRightbarOpen }) => {
         socket
     } = useContext(AuthContext)
 
-    const { call, startCall, acceptCall, endCall, toggleMute, toggleVideo } = useCall(socket, selectedUser);
+const { call, startCall, acceptCall, endCall, toggleMute, toggleVideo } = useCall(socket);
     const navigate = useNavigate();
 
     // AI handlers
@@ -209,6 +209,10 @@ const Chatcontainer = ({ setSidebarOpen, setRightbarOpen }) => {
     if (!call.remoteStream) return;
 
     remoteVideoRef.current.srcObject = call.remoteStream;
+
+    remoteVideoRef.current.onloadedmetadata = () => {
+        remoteVideoRef.current.play().catch(() => {});
+    };
 }, [call.remoteStream]);
 
     useEffect(() => {
@@ -283,8 +287,8 @@ const Chatcontainer = ({ setSidebarOpen, setRightbarOpen }) => {
                 </div>
 
                 {/* Call icons - visible on all screen sizes */}
-                <img onClick={() => startCall("audio")} src={assets.Audio_call} alt="audio call" className='w-5 cursor-pointer opacity-80 hover:opacity-100 transition' />
-                <img onClick={() => startCall("video")} src={assets.Vide_call} alt="video call" className='w-5 cursor-pointer opacity-80 hover:opacity-100 transition' />
+                <img onClick={() => startCall("audio", selectedUser)} src={assets.Audio_call} alt="audio call" className='w-5 cursor-pointer opacity-80 hover:opacity-100 transition' />
+                <img onClick={() => startCall("video", selectedUser)} src={assets.Vide_call} alt="video call" className='w-5 cursor-pointer opacity-80 hover:opacity-100 transition' />
 
                 {/* Info button - opens right sidebar (mobile: slide-in, desktop: always visible) */}
                 <button
