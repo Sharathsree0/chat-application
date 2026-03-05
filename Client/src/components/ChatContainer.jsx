@@ -11,7 +11,7 @@ import { Mic, MicOff, Video, VideoOff, PhoneOff } from "lucide-react";
 import axios from 'axios'
 import { useCall } from "../context/useCall.js";
 
-const Chatcontainer = () => {
+const Chatcontainer = ({ setSidebarOpen, setRightbarOpen }) => {
 
     const scrollEnd = useRef()
     const [input, setInput] = useState("")
@@ -252,17 +252,42 @@ const Chatcontainer = () => {
         <div className='h-full overflow-scroll relative backdrop-blur-lg'>
 
             {/* ── Header ── */}
-            <div className='flex items-center gap-8 py-3 mx-4 border-b border-stone-500'>
-                <img src={selectedUser.profilePic || assets.avatar_icon} alt="" className='w-8 rounded-full' />
-                <p className='flex-1 text-lg text-white flex items-center gap-2'>
+            <div className='flex items-center gap-3 py-3 mx-4 border-b border-stone-500'>
+                {/* Hamburger - mobile only */}
+                <button
+                    className="md:hidden text-gray-400 hover:text-white transition p-1 flex-shrink-0"
+                    onClick={() => setSidebarOpen && setSidebarOpen(true)}
+                >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+
+                <img src={selectedUser.profilePic || assets.avatar_icon} alt="" className='w-8 h-8 rounded-full object-cover flex-shrink-0' />
+                <p className='flex-1 text-lg text-white flex items-center gap-2 truncate'>
                     {selectedUser.fullName}
                     {onlineUser?.includes(selectedUser._id) &&
-                        <span className="w-2 h-2 rounded-full bg-green-500"></span>}
+                        <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></span>}
                 </p>
-                <img onClick={() => setSelectedUser(null)} src={assets.arrow_icon} alt="" className='md:hidden max-w-7 cursor-pointer' />
+
+                {/* Back arrow - mobile only */}
+                <img onClick={() => setSelectedUser(null)} src={assets.arrow_icon} alt="" className='md:hidden max-w-7 cursor-pointer flex-shrink-0' />
+
+                {/* Call icons - desktop */}
                 <img onClick={() => startCall("audio")} src={assets.Audio_call} alt="" className='max-md:hidden max-w-5 cursor-pointer' />
                 <img onClick={() => startCall("video")} src={assets.Vide_call} alt="" className='max-md:hidden max-w-5 cursor-pointer' />
                 <img src={assets.help_icon} alt="" className='max-md:hidden max-w-5 cursor-wait' />
+
+                {/* Info button - mobile only, opens right sidebar */}
+                <button
+                    className="md:hidden text-gray-400 hover:text-white transition p-1 flex-shrink-0"
+                    onClick={() => setRightbarOpen && setRightbarOpen(true)}
+                >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" strokeWidth={2} />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 16v-4M12 8h.01" />
+                    </svg>
+                </button>
             </div>
 
             {/* ── Incoming call overlay ── */}
