@@ -46,7 +46,7 @@ const Chatcontainer = ({ setSidebarOpen, setRightbarOpen }) => {
         socket
     } = useContext(AuthContext)
 
-const { call, startCall, acceptCall, endCall, toggleMute, toggleVideo } = useCall(socket);
+const { call, startCall, acceptCall, endCall, toggleMute, toggleVideo } = useCall(socket, selectedUser);
     const navigate = useNavigate();
 
     // AI handlers
@@ -287,8 +287,8 @@ const { call, startCall, acceptCall, endCall, toggleMute, toggleVideo } = useCal
                 </div>
 
                 {/* Call icons - visible on all screen sizes */}
-                <img onClick={() => startCall("audio", selectedUser)} src={assets.Audio_call} alt="audio call" className='w-5 cursor-pointer opacity-80 hover:opacity-100 transition' />
-                <img onClick={() => startCall("video", selectedUser)} src={assets.Vide_call} alt="video call" className='w-5 cursor-pointer opacity-80 hover:opacity-100 transition' />
+                <img onClick={() => startCall("audio")} src={assets.Audio_call} />
+                <img onClick={() => startCall("video")} src={assets.Vide_call} />
 
                 {/* Info button - opens right sidebar (mobile: slide-in, desktop: always visible) */}
                 <button
