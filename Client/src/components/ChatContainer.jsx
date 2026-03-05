@@ -205,10 +205,11 @@ const Chatcontainer = ({ setSidebarOpen, setRightbarOpen }) => {
     }, [messages])
 
     useEffect(() => {
-        if (remoteVideoRef.current && call.remoteStream) {
-            remoteVideoRef.current.srcObject = call.remoteStream;
-        }
-    }, [call.remoteStream]);
+    if (!remoteVideoRef.current) return;
+    if (!call.remoteStream) return;
+
+    remoteVideoRef.current.srcObject = call.remoteStream;
+}, [call.remoteStream]);
 
     useEffect(() => {
         if (!socket) return;
@@ -324,7 +325,7 @@ const Chatcontainer = ({ setSidebarOpen, setRightbarOpen }) => {
                     <div className="flex-1 flex items-center justify-center w-full">
 
                         {/* VIDEO CALL - connected */}
-                        {call.type === "video" && call.status === "connected" && (
+                        {call.type === "video" && (
                             <div className="relative w-full h-full flex items-center justify-center bg-black">
                                 {/* Remote stream - main large view */}
                                 {call.remoteStream ? (
