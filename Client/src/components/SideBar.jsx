@@ -64,8 +64,7 @@ const SideBar = ({ sidebarOpen, setSidebarOpen }) => {
         w-[280px] md:w-full
         transform transition-transform duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-        p-5 rounded-r-xl overflow-y-auto text-white
-        ${selectedUser ? 'max-md:hidden md:flex' : 'flex'} flex-col
+        p-5 rounded-r-xl overflow-y-auto text-white flex flex-col
       `}>
 
         {/* Header */}
