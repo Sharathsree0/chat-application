@@ -366,8 +366,17 @@ const Chatcontainer = () => {
                                 e.preventDefault()
                                 setMenuMsgId(msg._id)
                             }}
-                            className={`relative flex items-end gap-2 mb-5 ${isMe ? 'justify-end' : 'justify-start flex-row-reverse'}`}
+                            className={`relative flex items-end gap-2 mb-5 ${isMe ? 'justify-end' : 'justify-start'}`}
                         >
+                            {/* Avatar - left side for received messages */}
+                            {!isMe && (
+                                <img
+                                    src={selectedUser?.profilePic || assets.avatar_icon}
+                                    alt=""
+                                    className='w-7 h-7 rounded-full object-cover self-end'
+                                />
+                            )}
+
                             {/* Bubble content */}
                             <div className={`relative max-w-[240px] ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
 
@@ -445,12 +454,14 @@ const Chatcontainer = () => {
                                 </div>
                             </div>
 
-                            {/* Avatar */}
-                            <img
-                                src={isMe ? authUser?.profilePic || assets.avatar_icon : selectedUser?.profilePic || assets.avatar_icon}
-                                alt=""
-                                className='w-7 h-7 rounded-full object-cover self-end'
-                            />
+                            {/* Avatar - right side for sent messages */}
+                            {isMe && (
+                                <img
+                                    src={authUser?.profilePic || assets.avatar_icon}
+                                    alt=""
+                                    className='w-7 h-7 rounded-full object-cover self-end'
+                                />
+                            )}
                         </div>
                     )
                 })}
