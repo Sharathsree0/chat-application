@@ -46,7 +46,7 @@ const Chatcontainer = ({ setSidebarOpen, setRightbarOpen }) => {
         socket
     } = useContext(AuthContext)
 
-const { call, startCall, acceptCall, endCall, toggleMute, toggleVideo } = useCall(socket, selectedUser);
+    const { call, startCall, acceptCall, endCall, toggleMute, toggleVideo } = useCall(socket, selectedUser);
     const navigate = useNavigate();
 
     // AI handlers
@@ -205,15 +205,10 @@ const { call, startCall, acceptCall, endCall, toggleMute, toggleVideo } = useCal
     }, [messages])
 
     useEffect(() => {
-    if (!remoteVideoRef.current) return;
-    if (!call.remoteStream) return;
-
-    remoteVideoRef.current.srcObject = call.remoteStream;
-
-    remoteVideoRef.current.onloadedmetadata = () => {
-        remoteVideoRef.current.play().catch(() => {});
-    };
-}, [call.remoteStream]);
+        if (remoteVideoRef.current && call.remoteStream) {
+            remoteVideoRef.current.srcObject = call.remoteStream;
+        }
+    }, [call.remoteStream]);
 
     useEffect(() => {
         if (!socket) return;
@@ -287,8 +282,8 @@ const { call, startCall, acceptCall, endCall, toggleMute, toggleVideo } = useCal
                 </div>
 
                 {/* Call icons - visible on all screen sizes */}
-                <img onClick={() => startCall("audio")} src={assets.Audio_call} />
-                <img onClick={() => startCall("video")} src={assets.Vide_call} />
+                <img onClick={() => startCall("audio")} src={assets.Audio_call} alt="audio call" className='w-5 cursor-pointer opacity-80 hover:opacity-100 transition' />
+                <img onClick={() => startCall("video")} src={assets.Vide_call} alt="video call" className='w-5 cursor-pointer opacity-80 hover:opacity-100 transition' />
 
                 {/* Info button - opens right sidebar (mobile: slide-in, desktop: always visible) */}
                 <button
@@ -329,7 +324,7 @@ const { call, startCall, acceptCall, endCall, toggleMute, toggleVideo } = useCal
                     <div className="flex-1 flex items-center justify-center w-full">
 
                         {/* VIDEO CALL - connected */}
-                        {call.type === "video" && (
+                        {call.type === "video" && call.status === "connected" && (
                             <div className="relative w-full h-full flex items-center justify-center bg-black">
                                 {/* Remote stream - main large view */}
                                 {call.remoteStream ? (
@@ -673,7 +668,7 @@ const { call, startCall, acceptCall, endCall, toggleMute, toggleVideo } = useCal
                     <div className='relative flex-shrink-0'>
                         <img
                             src={assets.Voice_recoder}
-                            className={`w-6 sm:w-5 mr-2 cursor-pointer transition ${recording ? "filter brightness-150 hue-rotate-[-50deg]" : "opacity-70 hover:opacity-100"}`}
+                            className={`w-5 mr-2 cursor-pointer transition ${recording ? "filter brightness-150 hue-rotate-[-50deg]" : "opacity-70 hover:opacity-100"}`}
                             onClick={() => recording ? stopRecording() : startRecording()}
                         />
                         {recording && (
@@ -685,7 +680,7 @@ const { call, startCall, acceptCall, endCall, toggleMute, toggleVideo } = useCal
                     </div>
 
                     <div className='relative flex-shrink-0'>
-                        <img src={assets.AI_logo} onClick={() => setShowMenu(!showMenu)} className='w-6 sm:w-5 mr-2 cursor-pointer opacity-70 hover:opacity-100 transition' />
+                        <img src={assets.AI_logo} onClick={() => setShowMenu(!showMenu)} className='w-5 mr-2 cursor-pointer opacity-70 hover:opacity-100 transition' />
                     </div>
 
                     {showDecline && (
@@ -710,11 +705,11 @@ const { call, startCall, acceptCall, endCall, toggleMute, toggleVideo } = useCal
 
                     <label htmlFor="image" className='relative flex-shrink-0 cursor-pointer'>
                         <input onChange={handleSendImage} type="file" id="image" accept="image/png, image/jpeg" hidden />
-                        <img src={assets.gallery_icon} alt="" className="w-6 sm:w-5 mr-2 opacity-70 hover:opacity-100 transition" />
+                        <img src={assets.gallery_icon} alt="" className="w-5 mr-2 opacity-70 hover:opacity-100 transition" />
                     </label>
                 </div>
 
-                <img onClick={handleSendMessage} src={assets.send_button} alt="" className="w-9 sm:w-7 cursor-pointer flex-shrink-0" />
+                <img onClick={handleSendMessage} src={assets.send_button} alt="" className="w-7 cursor-pointer flex-shrink-0" />
             </div>
         </div>
     ) : (
