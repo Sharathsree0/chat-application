@@ -1,11 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useContext, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import assets from '../assets/assets'
-import { useRef } from 'react'
 import { formatMessageTime } from '../lib/utilis'
-import { useContext } from 'react'
 import { ChatContext } from '../context/chatContext.jsx'
 import { AuthContext } from '../context/authContext'
-import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { Mic, MicOff, Video, VideoOff, PhoneOff } from "lucide-react";
 import axios from 'axios'
@@ -49,6 +47,7 @@ const Chatcontainer = ({ setSidebarOpen, setRightbarOpen }) => {
     } = useContext(AuthContext)
 
     const { call, startCall, acceptCall, endCall, toggleMute, toggleVideo } = useCall(socket, selectedUser);
+    const navigate = useNavigate();
 
     // AI handlers
     const handleAiRephrase = async () => {
@@ -253,6 +252,7 @@ const Chatcontainer = ({ setSidebarOpen, setRightbarOpen }) => {
 
             {/* ── Header ── */}
             <div className='flex items-center gap-3 py-3 mx-4 border-b border-stone-500'>
+
                 {/* Hamburger - mobile only */}
                 <button
                     className="md:hidden text-gray-400 hover:text-white transition p-1 flex-shrink-0"
@@ -263,24 +263,31 @@ const Chatcontainer = ({ setSidebarOpen, setRightbarOpen }) => {
                     </svg>
                 </button>
 
-                <img src={selectedUser.profilePic || assets.avatar_icon} alt="" className='w-8 h-8 rounded-full object-cover flex-shrink-0' />
-                <p className='flex-1 text-lg text-white flex items-center gap-2 truncate'>
-                    {selectedUser.fullName}
-                    {onlineUser?.includes(selectedUser._id) &&
-                        <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></span>}
-                </p>
+                {/* Profile pic - tapping opens profile page */}
+                <img
+                    src={selectedUser.profilePic || assets.avatar_icon}
+                    alt=""
+                    className='w-9 h-9 rounded-full object-cover flex-shrink-0 cursor-pointer hover:opacity-80 transition'
+                    onClick={() => navigate('/profile')}
+                />
 
-                {/* Back arrow - mobile only */}
-                <img onClick={() => setSelectedUser(null)} src={assets.arrow_icon} alt="" className='md:hidden max-w-7 cursor-pointer flex-shrink-0' />
+                {/* Name + online */}
+                <div className='flex-1 min-w-0'>
+                    <p className='text-base font-semibold text-white truncate'>{selectedUser.fullName}</p>
+                    <p className='text-xs text-gray-400'>
+                        {onlineUser?.includes(selectedUser._id)
+                            ? <span className="text-green-400">Online</span>
+                            : 'Offline'}
+                    </p>
+                </div>
 
-                {/* Call icons - desktop */}
-                <img onClick={() => startCall("audio")} src={assets.Audio_call} alt="" className='max-md:hidden max-w-5 cursor-pointer' />
-                <img onClick={() => startCall("video")} src={assets.Vide_call} alt="" className='max-md:hidden max-w-5 cursor-pointer' />
-                <img src={assets.help_icon} alt="" className='max-md:hidden max-w-5 cursor-wait' />
+                {/* Call icons - visible on all screen sizes */}
+                <img onClick={() => startCall("audio")} src={assets.Audio_call} alt="audio call" className='w-5 cursor-pointer opacity-80 hover:opacity-100 transition' />
+                <img onClick={() => startCall("video")} src={assets.Vide_call} alt="video call" className='w-5 cursor-pointer opacity-80 hover:opacity-100 transition' />
 
-                {/* Info button - mobile only, opens right sidebar */}
+                {/* Info button - opens right sidebar (mobile: slide-in, desktop: always visible) */}
                 <button
-                    className="md:hidden text-gray-400 hover:text-white transition p-1 flex-shrink-0"
+                    className="text-gray-400 hover:text-white transition p-1 flex-shrink-0"
                     onClick={() => setRightbarOpen && setRightbarOpen(true)}
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -315,26 +322,73 @@ const Chatcontainer = ({ setSidebarOpen, setRightbarOpen }) => {
                         </p>
                     </div>
                     <div className="flex-1 flex items-center justify-center w-full">
+
+                        {/* VIDEO CALL - connected */}
                         {call.type === "video" && call.status === "connected" && (
-                            <div className="relative w-full h-full flex items-center justify-center">
+                            <div className="relative w-full h-full flex items-center justify-center bg-black">
+                                {/* Remote stream - main large view */}
                                 {call.remoteStream ? (
-                                    <video ref={remoteVideoRef} autoPlay playsInline className="w-[600px] max-w-full rounded-xl bg-black" />
-                                ) : (
-                                    <div className="text-white animate-pulse">Waiting for video...</div>
-                                )}
-                                {call.localStream && (
-                                    <video autoPlay playsInline muted
-                                        className="absolute bottom-6 right-6 w-32 h-40 rounded-lg border-2 border-white"
-                                        ref={(video) => { if (video) video.srcObject = call.localStream; }}
+                                    <video
+                                        ref={remoteVideoRef}
+                                        autoPlay
+                                        playsInline
+                                        className="w-full h-full object-cover rounded-xl"
                                     />
+                                ) : (
+                                    <div className="flex flex-col items-center gap-3 text-white animate-pulse">
+                                        <img src={call.activeUser?.profilePic || assets.avatar_icon} className="w-24 h-24 rounded-full" />
+                                        <p>Waiting for video...</p>
+                                    </div>
+                                )}
+                                {/* Local stream - picture-in-picture */}
+                                <video
+                                    autoPlay
+                                    playsInline
+                                    muted
+                                    className="absolute bottom-4 right-4 w-28 h-36 rounded-xl border-2 border-white object-cover shadow-xl"
+                                    ref={(video) => {
+                                        if (video && call.localStream) {
+                                            video.srcObject = call.localStream;
+                                        }
+                                    }}
+                                />
+                            </div>
+                        )}
+
+                        {/* AUDIO CALL */}
+                        {call.type === "audio" && (
+                            <div className="flex flex-col items-center gap-4">
+                                <div className="relative">
+                                    <img
+                                        src={call.activeUser?.profilePic || assets.avatar_icon}
+                                        className="w-32 h-32 rounded-full object-cover border-4 border-violet-500"
+                                    />
+                                    {call.status === "connected" && (
+                                        <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-black"></span>
+                                    )}
+                                </div>
+                                {call.status === "connected" && (
+                                    <div className="flex gap-1 items-end h-8">
+                                        {[...Array(5)].map((_, i) => (
+                                            <div
+                                                key={i}
+                                                className="w-1 bg-violet-400 rounded-full animate-bounce"
+                                                style={{
+                                                    height: `${Math.random() * 20 + 8}px`,
+                                                    animationDelay: `${i * 0.15}s`
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
                                 )}
                             </div>
                         )}
-                        {call.type === "audio" && (
-                            <img src={call.activeUser?.profilePic} className="w-40 h-40 rounded-full" />
-                        )}
-                        {call.type === "video" && call.status !== "connected" && (
-                            <div className="text-white text-lg animate-pulse">Connecting...</div>
+
+                        {/* Connecting state */}
+                        {call.status !== "connected" && (
+                            <div className="text-white text-lg animate-pulse absolute">
+                                {call.status === "calling" ? "Calling..." : "Connecting..."}
+                            </div>
                         )}
                     </div>
                     <div className="flex gap-8 mb-10">
@@ -520,9 +574,24 @@ const Chatcontainer = ({ setSidebarOpen, setRightbarOpen }) => {
                         {/* Copy - available to all */}
                         <p
                             className="cursor-pointer hover:text-violet-400 py-1"
-                            onClick={() => {
+                            onClick={async () => {
                                 const msg = messages.find(m => m._id === menuMsgId)
-                                if (msg?.text) navigator.clipboard.writeText(msg.text)
+                                if (msg?.isDeleted) {
+                                    toast.error("Cannot copy a deleted message")
+                                } else if (msg?.audio) {
+                                    toast.error("Cannot copy audio messages")
+                                } else if (msg?.image) {
+                                    toast.error("Cannot copy image messages")
+                                } else if (msg?.text && !msg.text.startsWith("__CALL__")) {
+                                    try {
+                                        await navigator.clipboard.writeText(msg.text)
+                                        toast.success("Copied!")
+                                    } catch {
+                                        toast.error("Copy failed")
+                                    }
+                                } else {
+                                    toast.error("Nothing to copy")
+                                }
                                 setMenuMsgId(null)
                             }}
                         >
@@ -596,22 +665,22 @@ const Chatcontainer = ({ setSidebarOpen, setRightbarOpen }) => {
                         <span className="text-xs text-gray-400 ml-2 animate-pulse">AI generating...</span>
                     )}
 
-                    <div className='relative group'>
+                    <div className='relative flex-shrink-0'>
                         <img
                             src={assets.Voice_recoder}
-                            className={`w-5 mr-2 cursor-pointer transition ${recording ? "filter brightness-150 hue-rotate-[-50deg]" : ""}`}
+                            className={`w-6 sm:w-5 mr-2 cursor-pointer transition ${recording ? "filter brightness-150 hue-rotate-[-50deg]" : "opacity-70 hover:opacity-100"}`}
                             onClick={() => recording ? stopRecording() : startRecording()}
                         />
                         {recording && (
-                            <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs text-red-500 flex items-center gap-1">
+                            <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-xs text-red-500 flex items-center gap-1 whitespace-nowrap">
                                 <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                                Recording...
+                                REC
                             </span>
                         )}
                     </div>
 
-                    <div className='relative group'>
-                        <img src={assets.AI_logo} onClick={() => setShowMenu(!showMenu)} className='w-5 mr-2 cursor-pointer' />
+                    <div className='relative flex-shrink-0'>
+                        <img src={assets.AI_logo} onClick={() => setShowMenu(!showMenu)} className='w-6 sm:w-5 mr-2 cursor-pointer opacity-70 hover:opacity-100 transition' />
                     </div>
 
                     {showDecline && (
@@ -634,13 +703,13 @@ const Chatcontainer = ({ setSidebarOpen, setRightbarOpen }) => {
                         </div>
                     )}
 
-                    <label htmlFor="image" className='p-2 relative group'>
+                    <label htmlFor="image" className='relative flex-shrink-0 cursor-pointer'>
                         <input onChange={handleSendImage} type="file" id="image" accept="image/png, image/jpeg" hidden />
-                        <img src={assets.gallery_icon} alt="" className="w-4.5 mr-2 cursor-pointer" />
+                        <img src={assets.gallery_icon} alt="" className="w-6 sm:w-5 mr-2 opacity-70 hover:opacity-100 transition" />
                     </label>
                 </div>
 
-                <img onClick={handleSendMessage} src={assets.send_button} alt="" className="w-7 cursor-pointer" />
+                <img onClick={handleSendMessage} src={assets.send_button} alt="" className="w-9 sm:w-7 cursor-pointer flex-shrink-0" />
             </div>
         </div>
     ) : (
